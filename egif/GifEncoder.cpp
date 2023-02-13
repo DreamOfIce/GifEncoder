@@ -127,7 +127,7 @@ bool GifEncoder::open(const std::string &file, int width, int height,
     return true;
 }
 
-bool GifEncoder::open(uint8_t **destPtr, int width, int height,
+bool GifEncoder::open(uint8_t **destPtr, size_t *destLength, int width, int height,
                       int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize) {
     if (m_gifFile != nullptr) {
         return false;
@@ -145,6 +145,7 @@ bool GifEncoder::open(uint8_t **destPtr, int width, int height,
 
     m_quality = quality;
     m_useGlobalColorMap = useGlobalColorMap;
+    m_destLength = destLength;
 
     reset();
 
@@ -283,16 +284,15 @@ bool GifEncoder::close() {
     }
     free(savedImages);
 
-    if(m_destPtr != nullptr){
+    if(m_destPtr != nullptr) {
         auto dest = (uint8_t *) malloc(m_result.size());
         memcpy(dest, m_result.data(), m_result.size());
         *m_destPtr = dest;
+        *m_destLength = m_result.size();
         m_destPtr = nullptr;
     }
 
     m_gifFileHandler = nullptr;
-    std::vector<int>().swap(m_allFrameDelays);
-    std::vector<uint8_t>().swap(m_result);
     reset();
 
     return true;

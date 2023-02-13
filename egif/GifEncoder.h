@@ -41,6 +41,7 @@ public:
      * create a gif builder
      *
      * @param[out] destPtr pointer to the result
+     * @param[out] destLength length of the result
      * @param[in] width gif width
      * @param[in] height gif height
      * @param[in] quality 1..30, 1 is best
@@ -51,7 +52,7 @@ public:
      *        If use local color map, preAllocSize = MAX(width * height) * 3
      * @return
      */
-    bool open(uint8_t **destPtr, int width, int height, int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize);
+    bool open(uint8_t **destPtr, size_t *destLength, int width, int height, int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize);
 
     /**
      * add frame
@@ -83,7 +84,8 @@ private:
             m_framePixels = nullptr;
         }
         m_allocSize = 0;
-        m_allFrameDelays.clear();
+        std::vector<int>().swap(m_allFrameDelays);
+        std::vector<uint8_t>().swap(m_result);
         m_frameCount = 0;
         m_frameWidth = -1;
         m_frameHeight = -1;
@@ -105,6 +107,7 @@ private:
     int m_frameHeight = -1;
 
     uint8_t **m_destPtr = nullptr;
+    size_t *m_destLength = nullptr;
     std::vector<uint8_t> m_result{};
 };
 
