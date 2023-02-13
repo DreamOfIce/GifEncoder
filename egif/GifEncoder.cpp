@@ -127,6 +127,54 @@ bool GifEncoder::open(const std::string &file, int width, int height,
     return true;
 }
 
+bool GifEncoder::open(uint8_t **destPtr, int width, int height,
+                      int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize) {
+    if (m_gifFile != nullptr) {
+        return false;
+    }
+
+    int error;
+    m_gifFileHandler = EGifOpen(&m_result, [](GifFileType * handle, const GifByteType * buffer, int length) -> int{
+        auto *data = (std::vector<uint8_t> *)(handle->UserData);
+        data->insert(data->end(), buffer, buffer + length);
+        return 1;
+    }, &error);
+    if (!m_gifFile) {
+        return false;
+    }
+
+    m_quality = quality;
+    m_useGlobalColorMap = useGlobalColorMap;
+
+    reset();
+
+    if (preAllocSize > 0) {
+        m_framePixels = (uint8_t *) malloc(preAllocSize);
+        m_allocSize = preAllocSize;
+    }
+
+    m_gifFile->SWidth = width;
+    m_gifFile->SHeight = height;
+    m_gifFile->SColorResolution = 8;
+    m_gifFile->SBackGroundColor = 0;
+    m_gifFile->SColorMap = nullptr;
+
+    uint8_t appExt[11] = {
+            'N', 'E', 'T', 'S', 'C', 'A', 'P', 'E',
+            '2', '.', '0'
+    };
+    uint8_t appExtSubBlock[3] = {
+            0x01,       // hex 0x01
+            0x00, 0x00  // little-endian short. The number of times the loop should be executed.
+    };
+    memcpy(appExtSubBlock + 1, &loop, sizeof(loop));
+
+    GifAddExtensionBlockFor(m_gifFile, APPLICATION_EXT_FUNC_CODE, sizeof(appExt), appExt);
+    GifAddExtensionBlockFor(m_gifFile, CONTINUE_EXT_FUNC_CODE, sizeof(appExtSubBlock), appExtSubBlock);
+
+    return true;
+}
+
 bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int width, int height, int delay) {
     if (m_gifFile == nullptr) {
         return false;
@@ -235,8 +283,16 @@ bool GifEncoder::close() {
     }
     free(savedImages);
 
-    m_gifFileHandler = nullptr;
+    if(m_destPtr != nullptr){
+        auto dest = (uint8_t *) malloc(m_result.size());
+        memcpy(dest, m_result.data(), m_result.size());
+        *m_destPtr = dest;
+        m_destPtr = nullptr;
+    }
 
+    m_gifFileHandler = nullptr;
+    std::vector<int>().swap(m_allFrameDelays);
+    std::vector<uint8_t>().swap(m_result);
     reset();
 
     return true;

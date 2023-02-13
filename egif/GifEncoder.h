@@ -23,19 +23,35 @@ public:
     /**
      * create gif file
      *
-     * @param file file path
-     * @param width gif width
-     * @param height gif height
-     * @param quality 1..30, 1 is best
-     * @param useGlobalColorMap
-     * @param loop loop count, 0 is endless
-     * @param For better performance, it's suggested to set preAllocSize. If you can't determine it, set to 0.
+     * @param[in] file file path
+     * @param[in] width gif width
+     * @param[in] height gif height
+     * @param[in] quality 1..30, 1 is best
+     * @param[in] useGlobalColorMap
+     * @param[in] loop loop count, 0 is endless
+     * @note For better performance, it's suggested to set preAllocSize. If you can't determine it, set to 0.
      *        If use global color map, all frames size must be same, and preAllocSize = width * height * 3 * nFrame
      *        If use local color map, preAllocSize = MAX(width * height) * 3
      * @return
      */
     bool open(const std::string &file, int width, int height,
               int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize = 0);
+
+    /**
+     * create a gif builder
+     *
+     * @param[out] destPtr pointer to the result
+     * @param[in] width gif width
+     * @param[in] height gif height
+     * @param[in] quality 1..30, 1 is best
+     * @param[in] useGlobalColorMap
+     * @param[in] loop loop count, 0 is endless
+     * @note For better performance, it's suggested to set preAllocSize. If you can't determine it, set to 0.
+     *        If use global color map, all frames size must be same, and preAllocSize = width * height * 3 * nFrame
+     *        If use local color map, preAllocSize = MAX(width * height) * 3
+     * @return
+     */
+    bool open(uint8_t **destPtr, int width, int height, int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize);
 
     /**
      * add frame
@@ -87,6 +103,9 @@ private:
     int m_frameCount = 0;
     int m_frameWidth = -1;
     int m_frameHeight = -1;
+
+    uint8_t **m_destPtr = nullptr;
+    std::vector<uint8_t> m_result{};
 };
 
 
