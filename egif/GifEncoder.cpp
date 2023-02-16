@@ -137,7 +137,7 @@ bool GifEncoder::open(uint8_t **destPtr, size_t *destLength, int width, int heig
     m_gifFileHandler = EGifOpen(&m_result, [](GifFileType * handle, const GifByteType * buffer, int length) -> int{
         auto *data = (std::vector<uint8_t> *)(handle->UserData);
         data->insert(data->end(), buffer, buffer + length);
-        return 1;
+        return length;
     }, &error);
     if (!m_gifFile) {
         return false;
@@ -145,6 +145,7 @@ bool GifEncoder::open(uint8_t **destPtr, size_t *destLength, int width, int heig
 
     m_quality = quality;
     m_useGlobalColorMap = useGlobalColorMap;
+    m_destPtr = destPtr;
     m_destLength = destLength;
 
     reset();
