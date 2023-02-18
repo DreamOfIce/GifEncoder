@@ -84,7 +84,7 @@ static bool convertToBGR(GifEncoder::PixelFormat format, uint8_t *dst, const uin
 }
 
 bool GifEncoder::open(const std::string &file, int width, int height,
-                      int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize) {
+                      int quality, bool useGlobalColorMap, uint16_t loop, int preAllocSize, bool noloop) {
     if (m_gifFile != nullptr) {
         return false;
     }
@@ -111,24 +111,26 @@ bool GifEncoder::open(const std::string &file, int width, int height,
     m_gifFile->SBackGroundColor = 0;
     m_gifFile->SColorMap = nullptr;
 
-    uint8_t appExt[11] = {
+    if(!noloop) {
+        uint8_t appExt[11] = {
             'N', 'E', 'T', 'S', 'C', 'A', 'P', 'E',
             '2', '.', '0'
-    };
-    uint8_t appExtSubBlock[3] = {
+        };
+        uint8_t appExtSubBlock[3] = {
             0x01,       // hex 0x01
             0x00, 0x00  // little-endian short. The number of times the loop should be executed.
-    };
-    memcpy(appExtSubBlock + 1, &loop, sizeof(loop));
+        };
+        memcpy(appExtSubBlock + 1, &loop, sizeof(loop));
 
-    GifAddExtensionBlockFor(m_gifFile, APPLICATION_EXT_FUNC_CODE, sizeof(appExt), appExt);
-    GifAddExtensionBlockFor(m_gifFile, CONTINUE_EXT_FUNC_CODE, sizeof(appExtSubBlock), appExtSubBlock);
+        GifAddExtensionBlockFor(m_gifFile, APPLICATION_EXT_FUNC_CODE, sizeof(appExt), appExt);
+        GifAddExtensionBlockFor(m_gifFile, CONTINUE_EXT_FUNC_CODE, sizeof(appExtSubBlock), appExtSubBlock);
+    }
 
     return true;
 }
 
 bool GifEncoder::open(uint8_t **destPtr, size_t *destLength, int width, int height,
-                      int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize) {
+                      int quality, bool useGlobalColorMap, uint16_t loop, int preAllocSize, bool noloop) {
     if (m_gifFile != nullptr) {
         return false;
     }
@@ -161,18 +163,20 @@ bool GifEncoder::open(uint8_t **destPtr, size_t *destLength, int width, int heig
     m_gifFile->SBackGroundColor = 0;
     m_gifFile->SColorMap = nullptr;
 
-    uint8_t appExt[11] = {
+    if(!noloop) {
+        uint8_t appExt[11] = {
             'N', 'E', 'T', 'S', 'C', 'A', 'P', 'E',
             '2', '.', '0'
-    };
-    uint8_t appExtSubBlock[3] = {
+        };
+        uint8_t appExtSubBlock[3] = {
             0x01,       // hex 0x01
             0x00, 0x00  // little-endian short. The number of times the loop should be executed.
-    };
-    memcpy(appExtSubBlock + 1, &loop, sizeof(loop));
+        };
+        memcpy(appExtSubBlock + 1, &loop, sizeof(loop));
 
-    GifAddExtensionBlockFor(m_gifFile, APPLICATION_EXT_FUNC_CODE, sizeof(appExt), appExt);
-    GifAddExtensionBlockFor(m_gifFile, CONTINUE_EXT_FUNC_CODE, sizeof(appExtSubBlock), appExtSubBlock);
+        GifAddExtensionBlockFor(m_gifFile, APPLICATION_EXT_FUNC_CODE, sizeof(appExt), appExt);
+        GifAddExtensionBlockFor(m_gifFile, CONTINUE_EXT_FUNC_CODE, sizeof(appExtSubBlock), appExtSubBlock);
+    }
 
     return true;
 }

@@ -29,13 +29,17 @@ public:
      * @param[in] quality 1..30, 1 is best
      * @param[in] useGlobalColorMap
      * @param[in] loop loop count, 0 is endless
+     * @param[in] preAllocSize pre-allocated buffer size
+     * @param[in] noloop set to true if you don't want to loop
+     * @note If you give the loop parameter a value greater than zero, then the animation will stop after n+1 plays.
+     *        If you want the animation to play only once, set the noloop parameter to true
      * @note For better performance, it's suggested to set preAllocSize. If you can't determine it, set to 0.
      *        If use global color map, all frames size must be same, and preAllocSize = width * height * 3 * nFrame
      *        If use local color map, preAllocSize = MAX(width * height) * 3
      * @return
      */
     bool open(const std::string &file, int width, int height,
-              int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize = 0);
+              int quality, bool useGlobalColorMap, uint16_t loop, int preAllocSize = 0, bool noloop = false);
 
     /**
      * create a gif builder
@@ -47,12 +51,16 @@ public:
      * @param[in] quality 1..30, 1 is best
      * @param[in] useGlobalColorMap
      * @param[in] loop loop count, 0 is endless
+     * @param[in] preAllocSize pre-allocated buffer size
+     * @param[in] noloop set to true if you don't want to loop
+     * @note If you give the loop parameter a value greater than zero, then the animation will stop after n+1 plays.
+     *        If you want the animation to play only once, set the noloop parameter to true
      * @note For better performance, it's suggested to set preAllocSize. If you can't determine it, set to 0.
      *        If use global color map, all frames size must be same, and preAllocSize = width * height * 3 * nFrame
      *        If use local color map, preAllocSize = MAX(width * height) * 3
      * @return
      */
-    bool open(uint8_t **destPtr, size_t *destLength, int width, int height, int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize);
+    bool open(uint8_t **destPtr, size_t *destLength, int width, int height, int quality, bool useGlobalColorMap, uint16_t loop, int preAllocSize, bool noloop = false);
 
     /**
      * add frame
